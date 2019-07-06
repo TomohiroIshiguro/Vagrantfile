@@ -36,5 +36,6 @@ Vagrant.configure("2") do |config|
   # Provisioning
   #----------------------------------------
   config.vm.provision "shell", path: "./provision/main.sh"
+  config.vm.provision "shell", path: "./provision/deploy_project.sh"
 
 end
