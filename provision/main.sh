@@ -2,8 +2,8 @@
 
 # このファイルで使用する変数をまとめてあります・
 # work_directoryは、Vagrantfileのsynced_folderで指定したフォルダと合わせてください。
-ip_address=192.168.33.84
-domain_name=vm.local
+ip_address=192.168.10.10
+domain_name=local.vm
 myapp_hosts="${ip_address} ${domain_name}"
 mysql_root_password=Root-000
 

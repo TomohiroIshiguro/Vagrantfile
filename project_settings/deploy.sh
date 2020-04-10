@@ -10,7 +10,7 @@ clone_location=/var/www
 branch='-b develop'
 repository_url=https://${gitlab_user}:${gitlab_pass}@github.com/account/project.git
 
-domain_name=vm.local
+domain_name=local.vm
 mysql_root_password=Root-000
 
 
