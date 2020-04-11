@@ -5,31 +5,21 @@
 ip_address=192.168.10.10
 domain_name=local.vm
 myapp_hosts="${ip_address} ${domain_name}"
-mysql_root_password=Root-000
+mysql_root_password=Root@000
 
 
-echo --------------------------------------------------------------------------------
-echo before
-echo --------------------------------------------------------------------------------
-
+echo ------------------------------------------------------------
+echo utils
+echo ------------------------------------------------------------
 sudo yum update -y
-sudo yum install -y zip unzip vim git wget yum-utils
-
-
-echo --------------------------------------------------------------------------------
-echo os setting
-echo --------------------------------------------------------------------------------
+sudo yum install -y zip \
+                    unzip \
+                    wget \
+                    vim \
+                    git \
+                    yum-utils
 
 sudo timedatectl set-timezone Asia/Tokyo
-
-sudo cat <<-HOSTS >> /etc/hosts
-${myapp_hosts}
-HOSTS
-
-
-echo --------------------------------------------------------------------------------
-echo disable SELinux
-echo --------------------------------------------------------------------------------
 
 sudo setenforce 0
 sudo cat <<-CONF > /etc/selinux/config
@@ -39,7 +29,7 @@ CONF
 
 
 echo --------------------------------------------------------------------------------
-echo install Apache
+echo middleware - web server
 echo --------------------------------------------------------------------------------
 
 sudo yum install -y httpd
@@ -50,39 +40,35 @@ sudo systemctl enable httpd.service
 
 
 echo --------------------------------------------------------------------------------
-echo install MySQL
+echo middleware - database server
 echo --------------------------------------------------------------------------------
 
-sudo yum localinstall -y https://dev.mysql.com/get/mysql80-community-release-el7-1.noarch.rpm
-sudo yum install -y mysql-community-server
-
-
-sudo cat <<-CONF >> /etc/my.cnf
-default_authentication_plugin=mysql_native_password
-
-# innodb_file_per_table=1
-# early-plugin-load=keyring_file.so
-# keyring_file_data=/var/lib/mysql-keyring/keyring
-
-# innodb_doublewrite=0
-# innodb_undo_directory=/var/lib/mysql-undo
-# innodb_rollback_segments=35
-# innodb_redo_log_encrypt=1
-# innodb_undo_log_encrypt=1
-CONF
-
-# テーブルごとに暗号化を行う場合
-# mkdir -p /usr/local/mysql/mysql-keyring
-# chown -R mysql.mysql /usr/local/mysql
-# chmod 750 /usr/local/mysql/mysql-keyring
-# mkdir /var/lib/mysql-undo
-# chown mysql.mysql /var/lib/mysql-undo
+sudo yum localinstall -y https://repo.mysql.com/mysql80-community-release-el7-3.noarch.rpm
+sudo sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/mysql-community.repo
+  
+sudo yum update -y
+sudo yum --enablerepo=mysql80-community install -y mysql-community-server
 
 sudo systemctl start mysqld.service
 sudo systemctl enable mysqld.service
 
+sudo cat <<-CONF >> /etc/my.cnf
+[mysqld]
+default-authentication-plugin=mysql_native_password
 
-# rootユーザのパスワードを取得する
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+
+character-set-server=utf8mb4
+default_password_lifetime=0
+CONF
+
+sudo systemctl restart mysqld.service
+
+
 password=`cat /var/log/mysqld.log | grep "A temporary password" | tr ' ' '\n' | tail -n1`
 echo ${password}
 
@@ -102,7 +88,7 @@ ARG
 
 
 echo --------------------------------------------------------------------------------
-echo install PHP
+echo sdk
 echo --------------------------------------------------------------------------------
 
 sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
@@ -112,19 +98,13 @@ sudo yum-config-manager --enable remi-php72
 sudo yum install -y php php-mcrypt php-mbstring php-pdo php-mysql php-gd php-xml php-pear php-devel php-intl php-cli php-tokenizer php-json
 
 sudo cat <<-CONF >> /etc/php.ini
-# コメントアウトを解除
 error_logs = /var/log/php_erros.log
 
-# それぞれ値を変更
 date.timezone = "Asia/Tokyo"
 mbstring.language = Japanese
 mbstring.internal_encoding = UTF-8
 CONF
 
-
-echo --------------------------------------------------------------------------------
-echo install Composer
-echo --------------------------------------------------------------------------------
 
 sudo curl -sS https://getcomposer.org/installer | php
 sudo mv composer.phar /usr/local/bin/composer
@@ -133,9 +113,6 @@ sudo mv composer.phar /usr/local/bin/composer
 echo --------------------------------------------------------------------------------
 echo after
 echo --------------------------------------------------------------------------------
-
-echo $ sudo cat /etc/hosts
-sudo cat /etc/hosts
 
 echo --- SELinux ---
 echo $ sudo getenforce
@@ -149,7 +126,7 @@ echo --- DB server ---
 echo $ sudo systemctl status mysqld.service
 sudo systemctl status mysqld.service
 
-echo --- Exec Runtime ---
+echo --- Runtime version ---
 echo $ php --version
 php --version
 
