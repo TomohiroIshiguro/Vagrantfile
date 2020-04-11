@@ -1,16 +1,15 @@
 #!/bin/sh
 
-gitlab_user=
-gitlab_pass=
-
-app_name=myapp
 domain_name=local.vm
 mysql_root_password=Root@000
-work_directory=/var/www/project
-clone_location=/var/www
-branch='-b develop'
-repository_url=https://${gitlab_user}:${gitlab_pass}@github.com/account/project.git
 
+app_name=
+work_directory=/vagrant/mnt/${app_name}
+clone_location=/vagrant/mnt
+gitlab_user=
+gitlab_pass=
+branch='-b develop'
+repository_url='https://${gitlab_user}:${gitlab_pass}@github.com/account/project.git ${app_name}'
 
 
 echo --------------------------------------------------------------------------------
