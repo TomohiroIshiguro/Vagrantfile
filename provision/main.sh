@@ -33,7 +33,7 @@ echo middleware - web server
 echo --------------------------------------------------------------------------------
 
 sudo yum install -y httpd
-sudo usermod vagrant apache
+sudo usermod -aG vagrant apache
 
 sudo systemctl start httpd.service
 sudo systemctl enable httpd.service
@@ -91,11 +91,23 @@ echo ---------------------------------------------------------------------------
 echo sdk
 echo --------------------------------------------------------------------------------
 
-sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-sudo yum install -y http://rpms.remirepo.net/enterprise/remi-release-7.rpm
-sudo yum-config-manager --enable remi-php72
+sudo yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+sudo yum localinstall -y http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+sudo yum install -y yum-utils
+sudo yum-config-manager --enable remi-php74
 
-sudo yum install -y php php-mcrypt php-mbstring php-pdo php-mysql php-gd php-xml php-pear php-devel php-intl php-cli php-tokenizer php-json
+sudo yum update -y
+sudo yum install -y php \
+                    php-bcmath \
+                    php-cli \
+                    php-ctype \
+                    php-devel \
+                    php-json \
+                    php-mbstring \
+                    php-mysql \
+                    php-tokenizer \
+                    php-xml \
+                    php-pdo
 
 sudo cat <<-CONF >> /etc/php.ini
 error_logs = /var/log/php_erros.log
@@ -106,8 +118,9 @@ mbstring.internal_encoding = UTF-8
 CONF
 
 
-sudo curl -sS https://getcomposer.org/installer | php
-sudo mv composer.phar /usr/local/bin/composer
+sudo php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+sudo php -r "unlink('composer-setup.php');"
 
 
 echo --------------------------------------------------------------------------------

@@ -53,7 +53,7 @@ CONF
 
 /usr/local/bin/composer install
 /usr/local/bin/composer update
-php artisan generate:key
+php artisan key:generate
 php artisan migrate --seed
 
 
