@@ -1,12 +1,7 @@
 #!/bin/sh
 
-# このファイルで使用する変数をまとめてあります・
-# work_directoryは、Vagrantfileのsynced_folderで指定したフォルダと合わせてください。
-ip_address=192.168.10.10
-domain_name=local.vm
-myapp_hosts="${ip_address} ${domain_name}"
+timezone=Asia/Tokyo
 mysql_root_password=Root@000
-
 
 echo ------------------------------------------------------------
 echo utils
@@ -19,7 +14,7 @@ sudo yum install -y zip \
                     git \
                     yum-utils
 
-sudo timedatectl set-timezone Asia/Tokyo
+sudo timedatectl set-timezone ${timezone}
 
 sudo setenforce 0
 sudo cat <<-CONF > /etc/selinux/config
